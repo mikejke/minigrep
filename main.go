@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	lib "github.com/mikejke/minigrep/lib"
@@ -11,7 +12,7 @@ func main() {
 	config, err := lib.NewConfig(os.Args)
 
 	if err != nil {
-		println("Problem parsing arguments:", err.Error())
+		log.Fatalln("Problem parsing arguments:", err.Error())
 		os.Exit(1)
 	}
 
@@ -21,7 +22,7 @@ func main() {
 	err = lib.Run(*config)
 
 	if err != nil {
-		println("Application error", err.Error())
+		log.Fatalln("Application error", err.Error())
 		os.Exit(1)
 	}
 }

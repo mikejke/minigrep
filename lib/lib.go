@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func Run(config Config) error {
@@ -13,14 +14,25 @@ func Run(config Config) error {
 		return err
 	}
 
-	fmt.Printf("With text:\n%s", string(content))
+	var result []string
+
+	if config.CaseSensitive {
+		result = Search(config.Query, string(content))
+	} else {
+		result = SearchCaseInsensitive(config.Query, string(content))
+	}
+
+	for _, line := range result {
+		fmt.Println(line)
+	}
 
 	return nil
 }
 
 type Config struct {
-	Query    string
-	Filename string
+	Query         string
+	Filename      string
+	CaseSensitive bool
 }
 
 func NewConfig(args []string) (*Config, error) {
@@ -31,5 +43,32 @@ func NewConfig(args []string) (*Config, error) {
 	query := os.Args[1]
 	filename := os.Args[2]
 
-	return &Config{query, filename}, nil
+	_, caseSensitive := os.LookupEnv("CASE_INSENSITIVE")
+
+	return &Config{query, filename, !caseSensitive}, nil
+}
+
+func Search(query string, content string) []string {
+	result := []string{}
+
+	for _, line := range strings.Split(content, "\n") {
+		if strings.Contains(line, query) {
+			result = append(result, line)
+		}
+	}
+
+	return result
+}
+
+func SearchCaseInsensitive(query string, content string) []string {
+	result := []string{}
+	query = strings.ToLower(query)
+
+	for _, line := range strings.Split(content, "\n") {
+		if strings.Contains(strings.ToLower(line), query) {
+			result = append(result, line)
+		}
+	}
+
+	return result
 }
